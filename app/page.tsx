@@ -16,100 +16,81 @@ export default function Home() {
 
   return (
     <div className="ds-page">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 md:px-8 md:py-12">
-        <header className="ds-hero-dark rounded-[28px] px-6 py-8 md:px-10 md:py-12">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-[#2997ff]">
-            Newslettech
-          </p>
-          <h1 className="max-w-4xl text-[34px] font-semibold leading-[1.07] tracking-[-0.02em] md:text-[56px]">
-            Tu radar diario de tecnologia,
-            <br className="hidden md:block" />
-            claro, breve y accionable.
-          </h1>
-          <p className="mt-4 max-w-2xl text-[17px] leading-[1.47] tracking-[-0.01em] text-white/82">
-            Seleccionamos lo mas relevante de Product Hunt, GitHub y Reddit para que no pierdas
-            tiempo filtrando ruido.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3 text-[12px] tracking-[-0.01em] text-white/72">
-            <span className="rounded-full border border-white/25 px-3 py-1">Resumen por correo</span>
-            <span className="rounded-full border border-white/25 px-3 py-1">Sin contrasena</span>
-            <span className="rounded-full border border-white/25 px-3 py-1">Configurable</span>
-          </div>
-        </header>
+      <main className="relative z-10 mx-auto flex w-full justify-center px-4 py-8 md:px-8 md:py-12">
+        <div className="premium-container">
+          <section className="premium-panel">
+            <div>
+              <span className="premium-brand">Newslettech</span>
+              <h1 className="mt-4 text-[42px] font-extrabold leading-[0.95] tracking-[-0.04em] md:text-[58px]">
+                Radar diario de tecnología.
+              </h1>
+              <p className="ds-muted mt-5 max-w-xl text-[18px] leading-[1.6]">
+                Claro, breve y accionable. Seleccionamos lo más relevante para que no pierdas
+                tiempo filtrando ruido.
+              </p>
 
-        <section className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-          <article className="ds-card rounded-[24px] p-6 md:p-8">
-            <h2 className="text-[28px] font-semibold leading-[1.14] tracking-[0.01em]">Como funciona</h2>
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <div className="ds-surface-soft rounded-[14px] p-4">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0071e3]">
-                  Paso 1
-                </p>
-                <p className="mt-2 text-[17px] font-semibold leading-[1.24] tracking-[-0.01em]">
-                  Escribe tu correo
-                </p>
-                <p className="mt-2 text-[14px] leading-[1.43] tracking-[-0.01em] text-black/70">
-                  Si ya estabas, recuperamos tu configuracion automaticamente.
-                </p>
+              <div className="mt-8 flex flex-wrap gap-2">
+                <span className="premium-source-tag">Product Hunt</span>
+                <span className="premium-source-tag">GitHub</span>
+                <span className="premium-source-tag">Reddit</span>
               </div>
-              <div className="ds-surface-soft rounded-[14px] p-4">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0071e3]">
-                  Paso 2
-                </p>
-                <p className="mt-2 text-[17px] font-semibold leading-[1.24] tracking-[-0.01em]">
-                  Ajusta tus intereses
-                </p>
-                <p className="mt-2 text-[14px] leading-[1.43] tracking-[-0.01em] text-black/70">
-                  Elige temas, frecuencia y fuentes favoritas.
-                </p>
+
+              <div className="mt-10 space-y-6">
+                <div className="premium-step">
+                  <span className="premium-step-num">01</span>
+                  <h3 className="mt-2 text-[18px] font-semibold">Escribe tu correo</h3>
+                  <p className="ds-muted mt-1 text-[14px] leading-[1.5]">
+                    Si ya eras usuario, recuperamos tu configuración automáticamente. Sin contraseñas.
+                  </p>
+                </div>
+                <div className="premium-step">
+                  <span className="premium-step-num">02</span>
+                  <h3 className="mt-2 text-[18px] font-semibold">Ajusta tus intereses</h3>
+                  <p className="ds-muted mt-1 text-[14px] leading-[1.5]">
+                    Elige temas, frecuencia y fuentes favoritas para un resumen a medida.
+                  </p>
+                </div>
+                <div className="premium-step">
+                  <span className="premium-step-num">03</span>
+                  <h3 className="mt-2 text-[18px] font-semibold">Recibe insights</h3>
+                  <p className="ds-muted mt-1 text-[14px] leading-[1.5]">
+                    No solo titulares: contexto estratégico para decidir rápido y con criterio.
+                  </p>
+                </div>
               </div>
-              <div className="ds-surface-soft rounded-[14px] p-4">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0071e3]">
-                  Paso 3
-                </p>
-                <p className="mt-2 text-[17px] font-semibold leading-[1.24] tracking-[-0.01em]">
-                  Recibe insights utiles
-                </p>
-                <p className="mt-2 text-[14px] leading-[1.43] tracking-[-0.01em] text-black/70">
-                  No solo titulares: contexto y accion para decidir rapido.
+            </div>
+
+            <div className="flex flex-col justify-end">
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-6">
+                <h2 className="text-[26px] font-semibold">Empieza ahora</h2>
+                <p className="ds-muted mt-2 text-[14px]">Te toma menos de un minuto configurar tu resumen.</p>
+
+                <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="tu-correo@ejemplo.com"
+                    className="ds-input w-full rounded-[12px] px-4 py-3 text-[16px] outline-none transition focus:ring-4 focus:ring-[#a855f7]/20"
+                  />
+
+                  <button
+                    type="submit"
+                    className="ds-btn-primary w-full px-5 py-3 text-[16px] font-bold transition"
+                  >
+                    Configurar mi resumen
+                  </button>
+                </form>
+
+                <p className="ds-soft mt-4 text-center text-[12px]">
+                  Vuelve cuando quieras para ajustar tus preferencias.
                 </p>
               </div>
             </div>
-          </article>
-
-          <aside className="ds-card rounded-[24px] p-6 md:p-8">
-            <h2 className="text-[28px] font-semibold leading-[1.14] tracking-[0.01em]">Empieza ahora</h2>
-            <p className="mt-3 text-[17px] leading-[1.47] tracking-[-0.01em] text-black/72">
-              Te toma menos de un minuto configurar tu resumen.
-            </p>
-
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <label className="block text-[14px] font-semibold leading-[1.29] tracking-[-0.01em]" htmlFor="email">
-                Correo electronico
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="tu-correo@ejemplo.com"
-                className="ds-input w-full rounded-[11px] px-4 py-3 text-[17px] leading-[1.24] tracking-[-0.01em] outline-none transition focus:ring-2 focus:ring-[#0071e3]/25"
-              />
-
-              <button
-                type="submit"
-                className="ds-btn-primary w-full px-5 py-3 text-[17px] font-semibold leading-[1.24] transition"
-              >
-                Configurar mi resumen
-              </button>
-            </form>
-
-            <p className="mt-4 text-[12px] leading-[1.33] tracking-[-0.01em] text-black/55">
-              Puedes volver con el mismo correo y ajustar tus preferencias cuando quieras.
-            </p>
-          </aside>
-        </section>
+          </section>
+        </div>
       </main>
     </div>
   );

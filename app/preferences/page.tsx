@@ -49,7 +49,6 @@ function formatNextDeliveryDate(frequency: Frequency, timezone: string): string 
 function PreferencesContent() {
   const params = useSearchParams();
   const [form, setForm] = useState<PreferencesForm>(initialForm);
-  const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -96,20 +95,13 @@ function PreferencesContent() {
           return;
         }
 
-        setForm({
-          topics: payload.data.topics,
-          githubLanguage: payload.data.githubLanguage,
-          subreddits: payload.data.subreddits,
-          maxItems: payload.data.maxItems,
-          frequency: payload.data.frequency,
-        });
+        setForm(payload.data);
       } catch {
-        if (controller.signal.aborted) return;
-        setErrorMessage("No pudimos cargar tu configuracion.");
-      } finally {
         if (!controller.signal.aborted) {
-          setLoading(false);
+          setErrorMessage("No pudimos cargar tu configuracion.");
         }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
 
@@ -124,41 +116,25 @@ function PreferencesContent() {
     }
 
     setSaving(true);
-    setSaved(false);
     setErrorMessage("");
-    setDeliveryMessage("");
 
     try {
       const res = await fetch("/api/preferences", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          topics: form.topics,
-          githubLanguage: form.githubLanguage,
-          subreddits: form.subreddits,
-          maxItems: form.maxItems,
-          frequency: form.frequency,
-        }),
+        body: JSON.stringify({ email, ...form }),
       });
 
-      const payload = (await res.json()) as {
-        data?: { nextDelivery?: Frequency };
-        error?: unknown;
-      };
+      const payload = (await res.json()) as { data?: { nextDelivery?: Frequency }; error?: unknown };
 
       if (!res.ok || payload.error) {
         throw new Error("No pudimos guardar tu configuracion.");
       }
 
-      const nextFrequency = payload.data?.nextDelivery ?? form.frequency;
-      const nextDateLabel = formatNextDeliveryDate(nextFrequency, userTimezone);
-
-      setSaved(true);
-      setDeliveryMessage(`Te enviamos tu resumen ahora. El proximo envio sera el ${nextDateLabel}.`);
-      setSuccessModalText(`Resumen enviado con exito. Tu proximo envio sera el ${nextDateLabel}.`);
+      const nextDateLabel = formatNextDeliveryDate(payload.data?.nextDelivery ?? form.frequency, userTimezone);
+      setDeliveryMessage(`Resumen enviado. El proximo envio sera el ${nextDateLabel}.`);
+      setSuccessModalText(`Tu resumen se envio correctamente. El proximo envio sera el ${nextDateLabel}.`);
       setShowSuccessModal(true);
-      window.setTimeout(() => setSaved(false), 2500);
     } catch {
       setErrorMessage("No pudimos guardar tu configuracion.");
     } finally {
@@ -179,14 +155,7 @@ function PreferencesContent() {
       const res = await fetch("/api/preferences/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          topics: form.topics,
-          githubLanguage: form.githubLanguage,
-          subreddits: form.subreddits,
-          maxItems: form.maxItems,
-          frequency: form.frequency,
-        }),
+        body: JSON.stringify({ email, ...form }),
       });
 
       const payload = (await res.json()) as { data?: { html?: string }; error?: unknown };
@@ -206,217 +175,154 @@ function PreferencesContent() {
 
   return (
     <div className="ds-page">
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-7 px-4 py-8 md:px-8 md:py-12">
-        <header className="ds-hero-dark rounded-[28px] px-6 py-7 md:px-10 md:py-10">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#2997ff]">
-            Configuracion
-          </p>
-          <h1 className="mt-2 text-[34px] font-semibold leading-[1.07] tracking-[-0.02em] md:text-[48px]">
-            Tu resumen por correo
-          </h1>
-          <p className="mt-3 max-w-2xl text-[17px] leading-[1.47] tracking-[-0.01em] text-white/82">
-            Ajusta lo que quieres recibir y nosotros nos encargamos de enviarlo en el horario elegido.
-          </p>
-          {email ? (
-            <p className="mt-5 inline-block rounded-[980px] border border-white/25 px-4 py-2 text-[14px] leading-[1.29] text-white/95">
-              Correo activo: {email}
-            </p>
-          ) : (
-            <p className="mt-5 inline-block rounded-[980px] border border-white/25 px-4 py-2 text-[14px] leading-[1.29] text-white/95">
-              No detectamos correo. Vuelve al inicio para continuar.
-            </p>
-          )}
-        </header>
-
-        <section className="ds-card rounded-[24px] p-6 md:p-10">
-          {loading && (
-            <p className="mb-5 text-[14px] leading-[1.29] tracking-[-0.01em] text-black/65" role="status" aria-live="polite">
-              Cargando tu configuracion...
-            </p>
-          )}
-
-          <div className="flex flex-col gap-10">
-            {/* GENERAL SECTION */}
+      <main className="relative z-10 mx-auto flex w-full justify-center px-4 py-8 md:px-8 md:py-12">
+        <div className="premium-container">
+          <section className="premium-panel">
             <div>
-              <div className="mb-5">
-                <h3 className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#86868b]">
-                  General
-                </h3>
-                <p className="mt-1 text-[14px] text-black/55">
-                  Configuracion base del resumen completo.
+              <span className="premium-brand">Configuracion</span>
+              <h1 className="mt-4 text-[38px] font-extrabold leading-[0.98] tracking-[-0.04em] md:text-[52px]">
+                Personaliza tu newsletter
+              </h1>
+              <p className="ds-muted mt-4 max-w-xl text-[16px] leading-[1.6]">
+                Ajusta tus temas y frecuencia en una sola pantalla. El resumen llega al mismo correo.
+              </p>
+
+              <div className="mt-8 space-y-3 text-[14px]">
+                <p className="ds-soft">Correo activo</p>
+                <p className="rounded-[12px] border border-white/10 bg-white/5 px-4 py-3 break-all">
+                  {email || "No detectamos correo. Vuelve al inicio para continuar."}
                 </p>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                <label className="block md:col-span-2">
-                  <span className="text-[15px] font-semibold text-[#1d1d1f]">
-                    Temas que quieres seguir
-                  </span>
-                  <p className="mb-2 text-[13px] text-black/55">Escribe conceptos abstractos o tecnologias especificas.</p>
-                  <textarea
-                    value={form.topics}
-                    onChange={(event) => setForm((prev) => ({ ...prev, topics: event.target.value }))}
-                    className="ds-input h-24 w-full rounded-[12px] border-black/10 px-4 py-3 text-[17px] outline-none transition focus:border-transparent focus:ring-4 focus:ring-[#0071e3]/20"
-                  />
-                </label>
+              <div className="mt-8 space-y-6">
+                <div className="premium-step">
+                  <span className="premium-step-num">GENERAL</span>
+                  <div className="mt-2 grid gap-4">
+                    <label>
+                      <p className="text-[14px] font-semibold">Temas que quieres seguir</p>
+                      <textarea
+                        value={form.topics}
+                        onChange={(event) => setForm((prev) => ({ ...prev, topics: event.target.value }))}
+                        className="ds-input mt-2 h-22 w-full rounded-[12px] px-4 py-3 text-[15px] outline-none transition focus:ring-4 focus:ring-[#a855f7]/20"
+                      />
+                    </label>
 
-                <label className="block">
-                  <span className="text-[15px] font-semibold text-[#1d1d1f]">
-                    Lenguaje preferido (GitHub)
-                  </span>
-                  <p className="mb-2 text-[13px] text-black/55">Proyectos destacados diarios.</p>
-                  <input
-                    value={form.githubLanguage}
-                    onChange={(event) => setForm((prev) => ({ ...prev, githubLanguage: event.target.value }))}
-                    className="ds-input w-full rounded-[12px] border-black/10 px-4 py-3 text-[17px] outline-none transition focus:border-transparent focus:ring-4 focus:ring-[#0071e3]/20"
-                  />
-                </label>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label>
+                        <p className="text-[14px] font-semibold">Lenguaje de programación (GitHub)</p>
+                        <input
+                          value={form.githubLanguage}
+                          onChange={(event) => setForm((prev) => ({ ...prev, githubLanguage: event.target.value }))}
+                          className="ds-input mt-2 w-full rounded-[12px] px-4 py-3 text-[15px] outline-none transition focus:ring-4 focus:ring-[#a855f7]/20"
+                        />
+                      </label>
 
-                <label className="block">
-                  <span className="text-[15px] font-semibold text-[#1d1d1f]">
-                    Cantidad por fuente
-                  </span>
-                  <p className="mb-2 text-[13px] text-black/55">Recomendamos entre 3 y 5.</p>
-                  <input
-                    type="number"
-                    min={1}
-                    max={10}
-                    value={form.maxItems}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, maxItems: Number(event.target.value) }))
-                    }
-                    className="ds-input w-full rounded-[12px] border-black/10 px-4 py-3 text-[17px] outline-none transition focus:border-transparent focus:ring-4 focus:ring-[#0071e3]/20"
-                  />
-                </label>
-              </div>
-            </div>
-
-            <hr className="border-black/5" />
-
-            {/* REDDIT SECTION */}
-            <div>
-              <div className="mb-5">
-                <h3 className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#86868b]">
-                  Reddit
-                </h3>
-                <p className="mt-1 text-[14px] text-black/55">
-                  Comunidades iniciales para buscar perspectivas y discusiones.
-                </p>
-              </div>
-
-              <label className="block">
-                <span className="text-[15px] font-semibold text-[#1d1d1f]">
-                  Subreddits
-                </span>
-                <p className="mb-2 text-[13px] text-black/55">Separados por comas.</p>
-                <input
-                  value={form.subreddits}
-                  onChange={(event) => setForm((prev) => ({ ...prev, subreddits: event.target.value }))}
-                  className="ds-input w-full rounded-[12px] border-black/10 px-4 py-3 text-[17px] outline-none transition focus:border-transparent focus:ring-4 focus:ring-[#0071e3]/20"
-                />
-              </label>
-            </div>
-
-            <hr className="border-black/5" />
-
-            {/* DELIVERY SECTION */}
-            <div>
-              <div className="mb-5">
-                <h3 className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#86868b]">
-                  Programacion
-                </h3>
-                <p className="mt-1 text-[14px] text-black/55">
-                  Decide que tan seguido recibes este correo.
-                </p>
-              </div>
-
-              <fieldset>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() => setForm((prev) => ({ ...prev, frequency: "daily" }))}
-                    className={`rounded-[12px] border px-4 py-4 text-center text-[17px] font-medium transition ${
-                      form.frequency === "daily"
-                        ? "border-[#0071e3] bg-[#0071e3]/5 text-[#0071e3] shadow-[0_0_0_1px_#0071e3]"
-                        : "border-black/10 bg-[#fafafc] text-black/70 hover:bg-black/5"
-                    }`}
-                  >
-                    Resumen Diario
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setForm((prev) => ({ ...prev, frequency: "weekly" }))}
-                    className={`rounded-[12px] border px-4 py-4 text-center text-[17px] font-medium transition ${
-                      form.frequency === "weekly"
-                        ? "border-[#0071e3] bg-[#0071e3]/5 text-[#0071e3] shadow-[0_0_0_1px_#0071e3]"
-                        : "border-black/10 bg-[#fafafc] text-black/70 hover:bg-black/5"
-                    }`}
-                  >
-                    Resumen Semanal
-                  </button>
+                      <label>
+                        <p className="text-[14px] font-semibold">Cantidad por fuente</p>
+                        <input
+                          type="number"
+                          min={1}
+                          max={10}
+                          value={form.maxItems}
+                          onChange={(event) =>
+                            setForm((prev) => ({ ...prev, maxItems: Number(event.target.value) }))
+                          }
+                          className="ds-input mt-2 w-full rounded-[12px] px-4 py-3 text-[15px] outline-none transition focus:ring-4 focus:ring-[#a855f7]/20"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
-              </fieldset>
-            </div>
-          </div>
 
-          <div className="mt-10 flex flex-col gap-3 border-t border-black/5 pt-8 sm:flex-row">
-            <button
-              type="button"
-              onClick={handlePreview}
-              disabled={previewLoading || loading || !email}
-              className="ds-btn-secondary px-5 py-3 text-[17px] font-semibold leading-[1.24] transition hover:bg-black/[0.03] disabled:opacity-60"
-            >
-              {previewLoading ? "Generando vista previa..." : "Ver vista previa"}
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving || loading || !email}
-              className="ds-btn-primary px-5 py-3 text-[17px] font-semibold leading-[1.24] transition disabled:opacity-60"
-            >
-              {saving ? "Guardando..." : "Guardar y enviar ahora"}
-            </button>
-            <Link
-              href="/"
-              className="ds-btn-secondary ml-auto px-5 py-3 text-[17px] font-semibold leading-[1.24] transition hover:bg-black/[0.03]"
-            >
-              Volver al inicio
-            </Link>
-          </div>
+                <div className="premium-step">
+                  <span className="premium-step-num">REDDIT</span>
+                  <label className="mt-2 block">
+                    <p className="text-[14px] font-semibold">Subreddits (separados por coma)</p>
+                    <input
+                      value={form.subreddits}
+                      onChange={(event) => setForm((prev) => ({ ...prev, subreddits: event.target.value }))}
+                      className="ds-input mt-2 w-full rounded-[12px] px-4 py-3 text-[15px] outline-none transition focus:ring-4 focus:ring-[#a855f7]/20"
+                    />
+                  </label>
+                </div>
 
-          <div className="mt-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-[13px] text-black/55">
-              Zona horaria detectada: {userTimezone}
-            </p>
-
-            {(saved || deliveryMessage || errorMessage) && (
-              <div className="text-right">
-                {saved && (
-                  <p className="text-[14px] leading-[1.29] font-medium tracking-[-0.01em] text-[#007a43]" role="status" aria-live="polite">
-                    Configuracion guardada.
-                  </p>
-                )}
-                {deliveryMessage && (
-                  <p className="mt-1 text-[13px] leading-[1.29] tracking-[-0.01em] text-black/75" role="status" aria-live="polite">
-                    {deliveryMessage}
-                  </p>
-                )}
-                {errorMessage && (
-                  <p className="text-[14px] font-medium leading-[1.29] tracking-[-0.01em] text-[#b42318]" role="status" aria-live="polite">
-                    {errorMessage}
-                  </p>
-                )}
+                <div className="premium-step">
+                  <span className="premium-step-num">FRECUENCIA</span>
+                  <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, frequency: "daily" }))}
+                      className={`rounded-[12px] border px-4 py-3 text-center text-[15px] font-semibold transition ${
+                        form.frequency === "daily"
+                          ? "border-[#a855f7] bg-[#a855f7]/10 text-[#d8b4fe]"
+                          : "border-white/10 bg-white/5 text-white/70"
+                      }`}
+                    >
+                      Diario
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, frequency: "weekly" }))}
+                      className={`rounded-[12px] border px-4 py-3 text-center text-[15px] font-semibold transition ${
+                        form.frequency === "weekly"
+                          ? "border-[#a855f7] bg-[#a855f7]/10 text-[#d8b4fe]"
+                          : "border-white/10 bg-white/5 text-white/70"
+                      }`}
+                    >
+                      Semanal
+                    </button>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+
+            <div className="flex flex-col justify-end">
+              <div className="rounded-[20px] border border-white/10 bg-white/5 p-6">
+                <h2 className="text-[24px] font-semibold">Acciones</h2>
+                <p className="ds-muted mt-2 text-[14px]">Previsualiza o envia de inmediato.</p>
+
+                <div className="mt-5 space-y-3">
+                  <button
+                    type="button"
+                    onClick={handlePreview}
+                    disabled={previewLoading || loading || !email}
+                    className="ds-btn-secondary w-full px-5 py-3 text-[15px] font-semibold disabled:opacity-60"
+                  >
+                    {previewLoading ? "Generando vista previa..." : "Ver vista previa"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={saving || loading || !email}
+                    className="ds-btn-primary w-full px-5 py-3 text-[15px] font-bold disabled:opacity-60"
+                  >
+                    {saving ? "Guardando..." : "Guardar y enviar ahora"}
+                  </button>
+
+                  <Link
+                    href="/"
+                    className="ds-btn-secondary block w-full px-5 py-3 text-center text-[15px] font-semibold"
+                  >
+                    Volver al inicio
+                  </Link>
+                </div>
+
+                <p className="ds-soft mt-4 text-[12px]">Zona horaria detectada: {userTimezone}</p>
+
+                {deliveryMessage && <p className="ds-muted mt-3 text-[13px]">{deliveryMessage}</p>}
+                {errorMessage && <p className="mt-3 text-[13px] text-[#fca5a5]">{errorMessage}</p>}
+              </div>
+            </div>
+          </section>
+        </div>
       </main>
 
       {showPreview && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-4xl rounded-[24px] bg-white p-4 shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] md:p-6">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4">
+          <div className="ds-card w-full max-w-4xl rounded-[24px] p-4 md:p-6">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="text-[21px] font-semibold">Vista previa del correo</h2>
+              <h2 className="text-[20px] font-semibold">Vista previa del correo</h2>
               <button
                 type="button"
                 onClick={() => setShowPreview(false)}
@@ -425,27 +331,23 @@ function PreferencesContent() {
                 Cerrar
               </button>
             </div>
-            <div className="h-[65vh] overflow-auto rounded-[11px] border border-black/15">
-              <iframe
-                title="Vista previa del correo"
-                srcDoc={previewHtml}
-                className="h-full w-full"
-              />
+            <div className="h-[65vh] overflow-auto rounded-[11px] border border-white/15">
+              <iframe title="Vista previa del correo" srcDoc={previewHtml} className="h-full w-full" />
             </div>
           </div>
         </div>
       )}
 
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-[24px] bg-white p-6 text-[#1d1d1f] shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px]">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#0071e3]">Envio listo</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="ds-card w-full max-w-md rounded-[24px] p-6">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#a855f7]">Envio listo</p>
             <h3 className="mt-2 text-[28px] font-semibold leading-[1.14]">Todo salio bien</h3>
-            <p className="mt-3 text-[17px] leading-[1.47] text-black/78">{successModalText}</p>
+            <p className="ds-muted mt-3 text-[16px] leading-[1.5]">{successModalText}</p>
             <button
               type="button"
               onClick={() => setShowSuccessModal(false)}
-              className="ds-btn-primary mt-5 w-full px-5 py-3 text-[17px] font-semibold leading-[1.24]"
+              className="ds-btn-primary mt-5 w-full px-5 py-3 text-[16px] font-bold"
             >
               Entendido
             </button>
@@ -458,7 +360,15 @@ function PreferencesContent() {
 
 export default function PreferencesPage() {
   return (
-    <Suspense fallback={<div className="ds-page"><main className="mx-auto flex w-full max-w-5xl px-4 py-8"><p>Cargando...</p></main></div>}>
+    <Suspense
+      fallback={
+        <div className="ds-page">
+          <main className="relative z-10 mx-auto flex w-full max-w-5xl px-4 py-8">
+            <p className="ds-muted">Cargando...</p>
+          </main>
+        </div>
+      }
+    >
       <PreferencesContent />
     </Suspense>
   );

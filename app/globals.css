@@ -1,18 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f5f7;
-  --foreground: #1d1d1f;
-  --surface: #ffffff;
-  --surface-soft: #fafafc;
-  --black: #000000;
-  --apple-blue: #0071e3;
-  --link-blue: #0066cc;
-  --link-blue-dark: #2997ff;
-  --text-muted: rgba(0, 0, 0, 0.8);
-  --text-soft: rgba(0, 0, 0, 0.48);
-  --focus: #0071e3;
-  --card-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+  --background: #050505;
+  --foreground: #e2e2e2;
+  --bg-deep: #050505;
+  --bg-surface: #0a0a0b;
+  --border-soft: rgba(255, 255, 255, 0.08);
+  --border-highlight: rgba(255, 255, 255, 0.15);
+  --accent-primary: #a855f7;
+  --accent-secondary: #3b82f6;
+  --text-main: #e2e2e2;
+  --text-muted: #9b9b9b;
+  --text-soft: #7a7a7a;
+  --focus: #a855f7;
+  --card-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  --card-sheen: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
 @theme inline {
@@ -21,11 +35,11 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-plus-jakarta-sans), system-ui, -apple-system, sans-serif;
   font-size: 17px;
-  line-height: 1.47;
+  line-height: 1.55;
   letter-spacing: -0.01em;
 }
 
@@ -33,8 +47,7 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: "SF Pro Display", "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial,
-    sans-serif;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 }
 
 :focus-visible {
@@ -44,45 +57,176 @@ h4 {
 
 .ds-page {
   min-height: 100vh;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-deep);
+  color: var(--text-main);
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-page::before {
+  content: "";
+  position: fixed;
+  top: -12%;
+  left: -10%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
+  filter: blur(100px);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .ds-hero-dark {
-  background: var(--black);
-  color: #ffffff;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  color: var(--text-main);
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-hero-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--card-sheen);
+  pointer-events: none;
 }
 
 .ds-card {
-  background: var(--surface);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  color: var(--text-main);
   box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.ds-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--card-sheen);
+  pointer-events: none;
 }
 
 .ds-surface-soft {
-  background: var(--surface-soft);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-soft);
 }
 
 .ds-input {
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  background: var(--surface-soft);
+  border: 1px solid var(--border-soft);
+  background: var(--bg-deep);
+  color: #ffffff;
 }
 
 .ds-input:focus {
-  border-color: var(--focus);
+  border-color: var(--accent-primary);
 }
 
 .ds-btn-primary {
-  background: var(--apple-blue);
-  color: #ffffff;
+  background: #ffffff;
+  color: #000000;
   border-radius: 980px;
+  transition: transform 200ms ease-out, opacity 200ms ease-out;
 }
 
 .ds-btn-primary:hover {
-  background: var(--link-blue);
+  transform: translateY(-2px);
+  opacity: 0.92;
 }
 
 .ds-btn-secondary {
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-highlight);
   border-radius: 980px;
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.03);
+  transition: transform 200ms ease-out, border-color 200ms ease-out;
+}
+
+.ds-btn-secondary:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-secondary);
+}
+
+.ds-platform-badge {
+  font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-secondary);
+}
+
+.ds-muted {
+  color: var(--text-muted);
+}
+
+.ds-soft {
+  color: var(--text-soft);
+}
+
+.premium-container {
+  max-width: 1100px;
+  width: 100%;
+  position: relative;
+}
+
+.premium-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: var(--card-shadow);
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--card-sheen);
+  pointer-events: none;
+}
+
+.premium-brand {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--accent-primary);
+}
+
+.premium-source-tag {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-soft);
+  color: var(--text-muted);
+}
+
+.premium-step {
+  position: relative;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--border-soft);
+}
+
+.premium-step-num {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--accent-primary);
+}
+
+@media (max-width: 900px) {
+  .premium-panel {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+  }
 }
