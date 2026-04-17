@@ -1,36 +1,170 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Newslettech
 
-## Getting Started
+Newslettech genera un newsletter tecnico personalizado desde Product Hunt, GitHub Trending y Reddit. El usuario deja su correo, configura preferencias y recibe un resumen curado por email de forma inmediata y programada.
 
-First, run the development server:
+## Features
+
+- Landing simple con flujo email-first (sin password)
+- Pantalla de preferencias por correo (carga/edicion)
+- Generacion de digest multi-fuente con filtros por usuario
+- Envio inmediato al guardar configuracion
+- Programacion de envios diarios/semanales (cron)
+- Resumen editorial asistido por LLM (Groq/Gemini + fallback)
+- Preview del correo antes de enviar
+
+## Stack
+
+- Next.js 16.2.4 + React 19.2.4 (App Router)
+- TypeScript strict
+- Bun (`bun.lock`)
+- Supabase (DB + RPC + scheduler integration)
+- Resend (email delivery)
+- Groq / Gemini (summarization)
+
+## Quick Start
+
+### 1) Install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2) Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create `.env` with at least:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
 
-## Learn More
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
-To learn more about Next.js, take a look at the following resources:
+CRON_SECRET=
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# LLM (Groq default)
+LLM_PROVIDER=groq
+GROQ_API_KEY=
+GROQ_MODEL=llama-3.1-8b-instant
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Optional fallback provider
+GEMINI_API_KEY=
+```
 
-## Deploy on Vercel
+### 3) Database setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Run in Supabase SQL Editor:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `supabase/schema.sql`
+
+This creates:
+- `subscribers`
+- `preferences`
+- `digest_runs`
+- RPC: `upsert_subscriber_preferences(...)`
+
+### 4) Run locally
+
+```bash
+bun run dev
+```
+
+Open `http://localhost:3000`.
+
+## Core User Flow
+
+1. User enters email on landing.
+2. App routes to preferences (`/preferences?email=...`).
+3. User saves preferences.
+4. Backend upserts subscriber + preferences in Supabase.
+5. Backend sends digest immediately by email.
+6. Cron sends future digests based on selected frequency.
+
+## API Overview
+
+### Preferences
+
+- `GET /api/preferences/lookup?email=...`
+  - Load existing preferences by email.
+- `POST /api/preferences`
+  - Upsert preferences + send digest now.
+- `POST /api/preferences/preview`
+  - Build email HTML preview without sending.
+
+### Digest
+
+- `POST /api/digest`
+  - Build digest payload from preferences.
+- `POST /api/digest/send`
+  - Send a provided digest to target email.
+
+### Scheduler
+
+- `POST /api/cron/send-digests`
+  - Protected by `Authorization: Bearer <CRON_SECRET>`
+  - Sends due digests for active subscribers.
+
+## Scheduler (Supabase Cron + Edge Function)
+
+See `SUPABASE_SETUP.md` for full steps.
+
+Minimal flow:
+
+1. Deploy edge function:
+
+```bash
+supabase functions deploy send-digests
+```
+
+2. Configure secrets:
+
+```bash
+supabase secrets set CRON_SECRET=... NEXT_APP_URL=https://your-app-domain.com
+```
+
+3. Run `supabase/cron.sql` (replace placeholders first).
+
+## Validation Commands
+
+Use this order for meaningful changes:
+
+```bash
+bun run lint
+bun x tsc --noEmit
+bun run build
+```
+
+## Known Notes
+
+- Source ingestion depends on third-party HTML/API behavior (selectors can drift).
+- If LLM provider fails or quota is hit, summary falls back to deterministic text.
+- Current product flow is email-based without auth; add verification if stronger ownership checks are needed.
+
+## Repo Structure (high-signal)
+
+- `app/page.tsx` - Landing
+- `app/preferences/page.tsx` - Preferences UI
+- `app/api/**/route.ts` - Backend endpoints
+- `lib/digest/*` - Scraping, summarization, email composition
+- `lib/supabase/server.ts` - Supabase server client
+- `supabase/schema.sql` - DB schema + RPC
+- `supabase/cron.sql` - cron scheduling SQL
+
+## Troubleshooting
+
+### Newsletter content formatting issues
+
+- Ensure `LLM_PROVIDER` and provider keys are set.
+- Preview before sending via `Ver vista previa`.
+- If provider output degrades, fallback sanitization is applied automatically.
+
+### Empty Reddit section
+
+- Validate subreddit seeds in preferences.
+- Check network/rate limits and source availability.
+
+### Cron not sending
+
+- Verify `CRON_SECRET` matches between scheduler and app.
+- Check `digest_runs` table for failure logs.
