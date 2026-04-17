@@ -61,7 +61,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col justify-end">
-              <div className="rounded-[20px] border border-white/10 bg-white/5 p-6">
+              <div className="ds-surface-soft rounded-[20px] p-6">
                 <h2 className="text-[26px] font-semibold">Empieza ahora</h2>
                 <p className="ds-muted mt-2 text-[14px]">Te toma menos de un minuto configurar tu resumen.</p>
 
