@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --surface: #ffffff;
+  --surface-soft: #fafafc;
+  --black: #000000;
+  --apple-blue: #0071e3;
+  --link-blue: #0066cc;
+  --link-blue-dark: #2997ff;
+  --text-muted: rgba(0, 0, 0, 0.8);
+  --text-soft: rgba(0, 0, 0, 0.48);
+  --focus: #0071e3;
+  --card-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.01em;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "SF Pro Display", "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.ds-page {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.ds-hero-dark {
+  background: var(--black);
+  color: #ffffff;
+}
+
+.ds-card {
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+.ds-surface-soft {
+  background: var(--surface-soft);
+}
+
+.ds-input {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: var(--surface-soft);
+}
+
+.ds-input:focus {
+  border-color: var(--focus);
+}
+
+.ds-btn-primary {
+  background: var(--apple-blue);
+  color: #ffffff;
+  border-radius: 980px;
+}
+
+.ds-btn-primary:hover {
+  background: var(--link-blue);
+}
+
+.ds-btn-secondary {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 980px;
+  color: rgba(0, 0, 0, 0.8);
+}
